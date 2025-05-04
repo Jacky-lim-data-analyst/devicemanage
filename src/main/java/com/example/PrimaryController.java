@@ -2,6 +2,8 @@ package com.example;
 
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -15,6 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Duration;
 // oshi imports
@@ -27,6 +30,7 @@ import oshi.hardware.UsbDevice;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OperatingSystem;
+import oshi.software.os.OperatingSystem.OSVersionInfo;
 import oshi.util.FormatUtil;
 
 public class PrimaryController implements Initializable{
@@ -44,6 +48,8 @@ public class PrimaryController implements Initializable{
     private TableView<usbDeviceInfo> usbTableView;
     @FXML
     private TableColumn<usbDeviceInfo, String> usbNamesColumn, usbProductIDColumn, usbSerialNumberColumn, usbVendorColumn;
+    @FXML
+    private TextArea systemInfoTextArea;
 
     // system monitoring instances (OSHI)
     private SystemInfo si;
@@ -87,6 +93,7 @@ public class PrimaryController implements Initializable{
         updateCpuUsage();
         updateMemoryUsage();
         updateDiskInfo();
+        updateSystemInfo();
 
         // setup usb devices and sensors
         updateUSBInfo();
@@ -287,6 +294,61 @@ public class PrimaryController implements Initializable{
         } else {
             cpuVoltageLabel.setText("N/A");
         }
+    }
+
+    /**
+     * Updates system information text area with OS details and runtime information
+     * Uses OSHI to gather system details
+     */
+    private void updateSystemInfo() {
+        StringBuilder sb = new StringBuilder();
+
+        // 1. OS version info
+        OSVersionInfo versionInfo = os.getVersionInfo();
+        sb.append("Operating System: ").append(os.toString()).append("\n");
+        sb.append("Version: ").append(versionInfo.getVersion()).append("\n");
+        sb.append("Build number: ").append(versionInfo.getBuildNumber()).append("\n\n");
+
+        // 2. Bitness (32-bit or 64-bit)
+        sb.append("Architecture: ").append((processor.getProcessorIdentifier().isCpu64bit()) ? "64-bit\n\n" : "32-bit\n\n");
+
+        // 3. Number of physical cores
+        sb.append("Number of physical cores: ").append(processor.getPhysicalProcessorCount()).append("\n\n");
+
+        // 4. OS family
+        sb.append("OS Family: ").append(os.getFamily()).append("\n");
+
+        // 5. OS manufacturer
+        sb.append("Manufacturer: ").append(os.getManufacturer()).append("\n\n");
+
+        // 6. Currently logged in user
+        sb.append("Current users:\n");
+        os.getSessions().forEach(user -> sb.append("- ").append(user.getUserName()).append(" (Login: ").append(
+            user.getLoginTime()
+        ).append(")\n"));
+        sb.append("\n");
+
+        // 7. Unix Time of Boot converts to current date time
+        long bootTime = os.getSystemBootTime();
+        Date bootDate = new Date(bootTime * 1000L);   // convert to ms
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sb.append("System Boot Time: ").append(dateFormat.format(bootDate)).append("\n\n");
+
+        // 8. Time since boot
+        long upTime = os.getSystemUptime();
+        java.time.Duration uptimeDuration = java.time.Duration.ofSeconds(upTime);
+        long hours = uptimeDuration.toHours();
+        long minutes = uptimeDuration.toMinutesPart();
+        // long minutes = uptimeDuration.toMinutes() % 60;
+        long seconds = uptimeDuration.toSecondsPart();
+        // long seconds = uptimeDuration.getSeconds() % 60;
+        sb.append(String.format("System Uptime: %02d:%02d:%02d\n\n", hours, minutes, seconds));
+
+        // 9. Number of threads running
+        sb.append("Running threads: ").append(os.getThreadCount()).append("\n");
+
+        // update text area
+        systemInfoTextArea.setText(sb.toString());
     }
 
     // disk info data class
