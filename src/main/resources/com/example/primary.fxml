@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1" fx:controller="com.example.PrimaryController">
+  <tabs>
+    <Tab fx:id="cpuRAMDrivesTab" text="CPU, RAM, drives">
+         <content>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <HBox fx:id="cpuHBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label text="CPU usage:">
+                           <font>
+                              <Font name="System Bold Italic" size="18.0" />
+                           </font>
+                        </Label>
+                        <ProgressBar fx:id="cpuProgressBar" prefHeight="20.0" prefWidth="281.0" progress="0.0" />
+                        <Label fx:id="cpuLabel" text="0 %">
+                           <font>
+                              <Font name="System Bold" size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox fx:id="memoryHBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Memory usage:">
+                           <font>
+                              <Font name="System Bold Italic" size="18.0" />
+                           </font>
+                        </Label>
+                        <ProgressBar fx:id="memoryProgressBar" prefHeight="20.0" prefWidth="212.0" progress="0.0" />
+                        <Label fx:id="memoryLabel" text="0%" />
+                     </children>
+                  </HBox>
+                  <TableView fx:id="diskTableView" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                      <TableColumn fx:id="nameColumn" maxWidth="120.0" prefWidth="75.0" text="Name" />
+                      <TableColumn fx:id="totalColumn" maxWidth="120.0" prefWidth="75.0" text="Total" />
+                        <TableColumn fx:id="usedColumn" maxWidth="120.0" prefWidth="75.0" text="Used" />
+                        <TableColumn fx:id="freeColumn" maxWidth="120.0" prefWidth="75.0" text="Free" />
+                        <TableColumn fx:id="usageColumn" maxWidth="120.0" prefWidth="103.0" text="Usage (%)" />
+                    </columns>
+                  </TableView>
+               </children>
+            </VBox>
+         </content></Tab>
+    <Tab fx:id="usbTabPane" text="USB devices">
+         <content>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Label text="USB devices" />
+                  <TableView fx:id="usbTableView" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                      <TableColumn fx:id="usbNamesColumn" prefWidth="75.0" text="Names" />
+                      <TableColumn fx:id="usbProductIDColumn" prefWidth="108.0" text="Product ID" />
+                        <TableColumn fx:id="usbSerialNumberColumn" prefWidth="127.0" text="Serial number" />
+                        <TableColumn fx:id="usbVendorColumn" prefWidth="107.0" text="Vendors" />
+                    </columns>
+                  </TableView>
+                  <Label text="Sensors" />
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="413.0" spacing="5.0">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <padding>
+                        <Insets right="50.0" />
+                     </padding>
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="155.0" spacing="15.0">
+                           <children>
+                              <Label alignment="CENTER" text="CPU temperature" />
+                              <Label fx:id="cpuTemperatureLabel" text="°C" textFill="#393737">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="155.0" spacing="15.0">
+                           <children>
+                              <Label alignment="CENTER" text="Fan Speed" />
+                              <Label fx:id="fanSpeedLabel" text="rpm" textFill="#393737">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" prefHeight="100.0" prefWidth="155.0" spacing="15.0">
+                           <children>
+                              <Label alignment="CENTER" text="CPU voltage" />
+                              <Label fx:id="cpuVoltageLabel" text="V" textFill="#393737">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </content></Tab>
+      <Tab text="Untitled Tab">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+        </content>
+      </Tab>
+  </tabs>
+</TabPane>

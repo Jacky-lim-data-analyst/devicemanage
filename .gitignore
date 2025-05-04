@@ -1,0 +1,17 @@
+# Build artifacts
+/target/
+/*.jar
+/*.war
+/*.class
+
+# IDE files
+/.vscode/
+/*.iml
+*.ipr
+*.iws
+/.classpath
+/.project
+/.settings/
+
+# Log files
+*.log
