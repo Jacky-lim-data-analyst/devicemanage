@@ -3,6 +3,8 @@ package com.example;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -29,6 +31,7 @@ import oshi.hardware.Sensors;
 import oshi.hardware.UsbDevice;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
+import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 import oshi.software.os.OperatingSystem.OSVersionInfo;
 import oshi.util.FormatUtil;
@@ -44,12 +47,26 @@ public class PrimaryController implements Initializable{
     private TableView<DiskInfo> diskTableView;
     @FXML
     private TableColumn<DiskInfo, String> nameColumn, totalColumn, usedColumn, freeColumn, usageColumn;
+
+    // FXML UI components (usb devices info)
     @FXML
     private TableView<usbDeviceInfo> usbTableView;
     @FXML
     private TableColumn<usbDeviceInfo, String> usbNamesColumn, usbProductIDColumn, usbSerialNumberColumn, usbVendorColumn;
     @FXML
     private TextArea systemInfoTextArea;
+
+    // new FXML components for processes
+    @FXML
+    private TableView<ProcessInfo> processesTableView;
+    @FXML
+    private TableColumn<ProcessInfo, Integer> processIDColumn, processPriorityColumn, numThreadsColumn;
+    @FXML 
+    private TableColumn<ProcessInfo, Double> cpuUsageColumn, processMemoryColumn;
+    @FXML
+    private TableColumn<ProcessInfo, String> processNamesColumn, pathsColumn, startTimeColumn;
+    @FXML
+    private Label numProcessesLabel;
 
     // system monitoring instances (OSHI)
     private SystemInfo si;
@@ -64,6 +81,8 @@ public class PrimaryController implements Initializable{
     private final ObservableList<DiskInfo> diskData = FXCollections.observableArrayList();
     // observable list for usb devices in the TableView
     private final ObservableList<usbDeviceInfo> usbDeviceData = FXCollections.observableArrayList();
+    // observable list for processes in the TableView
+    private final ObservableList<ProcessInfo> processData = FXCollections.observableArrayList();
     // Timeline for periodic update
     private Timeline updateTimeline;
     // CPU Load calculation
@@ -83,8 +102,11 @@ public class PrimaryController implements Initializable{
         // setup disk table view
         initializeDiskTableView();
 
-        // setup usb devices table view ***
+        // setup usb devices table view 
         initializeUsbTableView();
+
+        // setup processes table view
+        initializeProcessTableView();
 
         // initialize UI
         initializeUI();
@@ -94,6 +116,7 @@ public class PrimaryController implements Initializable{
         updateMemoryUsage();
         updateDiskInfo();
         updateSystemInfo();
+        updateProcessInfo();
 
         // setup usb devices and sensors
         updateUSBInfo();
@@ -113,6 +136,7 @@ public class PrimaryController implements Initializable{
         // labels initialization
         cpuLabel.setText("0.0%");
         memoryLabel.setText("0.0%");
+        numProcessesLabel.setText("0");
     }
 
     /**
@@ -142,6 +166,28 @@ public class PrimaryController implements Initializable{
 
         usbTableView.setItems(usbDeviceData);
     }
+
+    /**
+     * Configures the tableview columns to bind to ProcessInfo properties
+     */
+    private void initializeProcessTableView() {
+        // setup process table columns
+        processIDColumn.setCellValueFactory(new PropertyValueFactory<>("processId"));
+        processNamesColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        pathsColumn.setCellValueFactory(new PropertyValueFactory<>("path"));
+        processPriorityColumn.setCellValueFactory(new PropertyValueFactory<>("priority"));
+        cpuUsageColumn.setCellValueFactory(new PropertyValueFactory<>("cpuUsageFormatted"));
+        startTimeColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        numThreadsColumn.setCellValueFactory(new PropertyValueFactory<>("threadCount"));
+        processMemoryColumn.setCellValueFactory(new PropertyValueFactory<>("memorySizeFormatted"));
+
+        // make columns resizable
+        processesTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // set data source for table
+        processesTableView.setItems(processData);
+    }
+
     /**
      * Setup and starts a TimeLine to periodically call the update methods
      */
@@ -153,7 +199,7 @@ public class PrimaryController implements Initializable{
                 updateMemoryUsage();
                 updateDiskInfo();
                 updateUSBInfo();
-                updateCpuUsage();
+                updateProcessInfo();
             })
         );
 
@@ -297,6 +343,82 @@ public class PrimaryController implements Initializable{
     }
 
     /**
+     * Updates process information in the TableView. Uses OSHI to get process details.
+     * Running processes are shown at the top
+     */
+    private void updateProcessInfo() {
+        // get current processes
+        List<OSProcess> processes = os.getProcesses();
+
+        // create a temporary list to store process info
+        List<ProcessInfo> updatedProcesses = new ArrayList<>();
+
+        // process count
+        int runningCount = 0;
+
+        // Date format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // get number of logical processors for CPU load calculation
+        int logicalProcessorCount = processor.getLogicalProcessorCount();
+        if (logicalProcessorCount <= 0) {
+            logicalProcessorCount = 1;
+        }
+
+        for (OSProcess process : processes) {
+            // skip processes that can't be properly accessed
+            if (process.getName().isEmpty()) {
+                continue;
+            }
+
+            // CPU usage (Calculate CPU usage per logical processor and convert to percent)
+            // sum ticks across cores, divided by #cores
+            double cpuLoadTotal = process.getProcessCpuLoadBetweenTicks(process);
+            double cpuUsagePercent = (cpuLoadTotal / logicalProcessorCount) * 100.0;
+            // String cpuUsageString = df.format(cpuUsage);
+
+            // start time
+            String startTime = dateFormat.format(new Date(process.getStartTime()));
+
+            // priority
+            int priority = process.getPriority();
+
+            // virtual memory size (MB)
+            double memorySizeMB = process.getVirtualSize() / (1024.0 * 1024.0);
+
+            // create process info object
+            ProcessInfo info = new ProcessInfo(
+                process.getProcessID(), 
+                process.getName(), 
+                process.getPath(), 
+                priority, 
+                cpuUsagePercent, 
+                startTime, 
+                process.getThreadCount(), 
+                memorySizeMB
+            );
+
+            // count running processes (those using CPU)
+            if (process.getState() == OSProcess.State.RUNNING || cpuUsagePercent > 1.0) {
+                runningCount++;
+            }
+
+            updatedProcesses.add(info);
+        }
+
+        // sort processes - running process first
+        updatedProcesses.sort(Comparator.<ProcessInfo, Double>comparing(p -> p.getCpuUsage(), Comparator.reverseOrder())
+            .thenComparing(ProcessInfo::getName));
+
+        // update UI with new process data
+        processData.clear();
+        processData.addAll(updatedProcesses);
+
+        // update running process count
+        numProcessesLabel.setText(String.valueOf(runningCount));
+    }
+
+    /**
      * Updates system information text area with OS details and runtime information
      * Uses OSHI to gather system details
      */
@@ -394,5 +516,43 @@ public class PrimaryController implements Initializable{
         public String getProductID() { return productID; }
         public String getSerialNumber() { return serialNumber; }
         public String getVendor() { return vendor; }
+    }
+
+    // process info data class
+    public static class ProcessInfo {
+        private final int processId;
+        private final String name;
+        private final String path;
+        private final int priority;
+        private final double cpuUsage;   // raw percent
+        private final String startTime;
+        private final int threadCount;
+        private final double memorySize;   // memory size in MB
+
+        public ProcessInfo(int processId, String name, String path, int priority,
+            double cpuUsage, String startTime, int threadCount, double memorySize) {
+                this.processId = processId;
+                this.name = name;
+                this.path = path;
+                this.priority = priority;
+                this.cpuUsage = cpuUsage;
+                this.startTime = startTime;
+                this.threadCount = threadCount;
+                this.memorySize = memorySize;
+            }
+
+        // getters
+        public int getProcessId() { return processId; }
+        public String getName() { return name; }
+        public String getPath() { return path; }
+        public int getPriority() { return priority; }
+        public double getCpuUsage() { return cpuUsage; }
+        public String getStartTime() { return startTime; }
+        public int getThreadCount() { return threadCount; }
+        public double getMemorySize() { return memorySize; }
+
+        // formatted getters for display
+        public String getCpuUsageFormatted() { return String.format("%.2f%%", cpuUsage); }
+        public String getMemorySizeFormatted() { return String.format("%.1f", memorySize); }
     }
 }
