@@ -1,8 +1,15 @@
 package com.example;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -29,6 +36,7 @@ import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.Sensors;
 import oshi.hardware.UsbDevice;
+import oshi.software.os.ApplicationInfo;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.software.os.OSProcess;
@@ -68,6 +76,12 @@ public class PrimaryController implements Initializable{
     @FXML
     private Label numProcessesLabel;
 
+    // new FXML components for applications installed on host machine
+    @FXML 
+    private TableView<AppsInfo> applicationsTableView;
+    @FXML
+    private TableColumn<AppsInfo, String> appNamesColumn, appTimeColumn, vendorsColumn, versionsColumn;
+
     // system monitoring instances (OSHI)
     private SystemInfo si;
     private HardwareAbstractionLayer hal;   
@@ -83,6 +97,8 @@ public class PrimaryController implements Initializable{
     private final ObservableList<usbDeviceInfo> usbDeviceData = FXCollections.observableArrayList();
     // observable list for processes in the TableView
     private final ObservableList<ProcessInfo> processData = FXCollections.observableArrayList();
+    // observable list for app
+    private final ObservableList<AppsInfo> applicationData = FXCollections.observableArrayList();
     // Timeline for periodic update
     private Timeline updateTimeline;
     // CPU Load calculation
@@ -473,6 +489,30 @@ public class PrimaryController implements Initializable{
         systemInfoTextArea.setText(sb.toString());
     }
 
+    /**
+     * Updates installed applications information in the TableView. Use OSHI to get installed software details
+     */
+    private void updateApplicationInfo() {
+        List<ApplicationInfo> listOfApps = os.getInstalledApplications();
+
+        List<AppsInfo> currentApplications = new ArrayList<>();
+
+        for (ApplicationInfo app: listOfApps) {
+            // extract data
+            String name = app.getName() != null && !app.getName().isEmpty() ? app.getName() : "Unknown";
+            long timestamp = app.getTimestamp();
+            
+        }
+    }
+
+    private String convertTimeStamp(long timestamp) {
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        DateTimeFormatter formatter = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone(ZoneId.of("UTC"));
+        return formatter.format(instant);
+    }
+
     // disk info data class
     public static class DiskInfo {
         private final String name;
@@ -554,5 +594,26 @@ public class PrimaryController implements Initializable{
         // formatted getters for display
         public String getCpuUsageFormatted() { return String.format("%.2f%%", cpuUsage); }
         public String getMemorySizeFormatted() { return String.format("%.1f", memorySize); }
+    }
+
+    // Data class for installed applications info
+    public static class AppsInfo {
+        private final String name;
+        private final String installTime;
+        private final String vendor;
+        private final String version;
+
+        public AppsInfo(String name, String installTime, String vendor, String version) {
+            this.name = name;
+            this.installTime = installTime;
+            this.vendor = vendor;
+            this.version = version;
+        }
+
+        // getters
+        public String getName() { return name; }
+        public String getInstallTime() { return installTime; }
+        public String getVendor() { return vendor; }
+        public String getVersion() { return version; }
     }
 }

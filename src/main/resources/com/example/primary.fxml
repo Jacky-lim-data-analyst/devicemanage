@@ -158,5 +158,21 @@
             </AnchorPane>
         </content>
       </Tab>
+      <Tab fx:id="applicationTab" text="Applications">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <TableView fx:id="applicationsTableView" prefHeight="370.0" prefWidth="600.0">
+                    <columns>
+                      <TableColumn fx:id="appNamesColumn" prefWidth="75.0" text="Names" />
+                      <TableColumn fx:id="appTimeColumn" prefWidth="144.0" text="Installation time" />
+                        <TableColumn fx:id="vendorsColumn" prefWidth="97.0" text="Vendors" />
+                        <TableColumn fx:id="versionsColumn" prefWidth="112.0" text="Versions" />
+                    </columns>
+                  </TableView>
+               </children>
+            </AnchorPane>
+        </content>
+      </Tab>
   </tabs>
 </TabPane>
