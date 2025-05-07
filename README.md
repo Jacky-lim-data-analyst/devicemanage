@@ -40,13 +40,13 @@ A comprehensive desktop system monitoring application built with JavaFX and the 
 - OSHI library (and its dependencies)
 
 ## Installation
-1. Clone this repo
+1. Clone this repo <br>
 `git clone https://github.com/Jacky-lim-data-analyst/devicemanage.git`
-2. Navigate to the project directory
+2. Navigate to the project directory <br>
 `cd devicemanage`
-3. Build the project with Maven:
+3. Build the project with Maven: <br>
 `mvn clean install`
-4. Run the application:
+4. Run the application: <br>
 `mvn javafx:run`
 
 ## License
