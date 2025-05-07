@@ -1,0 +1,70 @@
+/* JavaFX TextArea Custom Styling
+* TextArea components displaying lists of text
+*/
+
+.text-area {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c8c8c8;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 2, 0, 0, 1);
+}
+
+/* content area styling */
+.text-area .content {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 4px;
+}
+
+/* focus state */
+.text-area:focused {
+    -fx-border-color: #4d90fe;
+    -fx-effect: dropshadow(gaussian, rgba(77, 144, 254, 0.2), 4, 0, 0, 1);
+}
+
+/* Scrollbar styling */
+.text-area .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12px;
+}
+
+.text-area .scroll-bar:vertical .thumb {
+    -fx-background-color: #b3b3b3;
+    -fx-background-radius: 6px;
+}
+
+.text-area .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #8f8f8f;
+}
+
+.text-area .scroll-bar:vertical .increment-button,
+.text-area .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5px;
+}
+
+.text-area .scroll-bar .increment-arrow,
+.text-area .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* Hover state */
+.text-area:hover {
+    -fx-border-color: #b8b8b8;
+}
+
+/* Disabled state */
+.text-area:disabled {
+    -fx-opacity: 0.7;
+    -fx-background-color: #f8f8f8;
+}
+
+/* Text selection */
+.text-area .text-selection {
+    -fx-fill: #cce4ff;
+}

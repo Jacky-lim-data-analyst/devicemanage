@@ -127,12 +127,16 @@ public class PrimaryController implements Initializable{
         // initialize UI
         initializeUI();
 
+        // initialize app info
+        initializeApplicationsTableView();
+
         // setup periodic updates (1 s)
         updateCpuUsage();
         updateMemoryUsage();
         updateDiskInfo();
         updateSystemInfo();
         updateProcessInfo();
+        updateApplicationInfo();
 
         // setup usb devices and sensors
         updateUSBInfo();
@@ -205,6 +209,19 @@ public class PrimaryController implements Initializable{
     }
 
     /**
+     * Configures the TableView columns to bind to ApplicationInfo properties
+     */
+    private void initializeApplicationsTableView() {
+        appNamesColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        appTimeColumn.setCellValueFactory(new PropertyValueFactory<>("installTime"));
+        vendorsColumn.setCellValueFactory(new PropertyValueFactory<>("vendor"));
+        versionsColumn.setCellValueFactory(new PropertyValueFactory<>("version"));
+
+        applicationsTableView.setItems(applicationData);
+        applicationsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    }
+
+    /**
      * Setup and starts a TimeLine to periodically call the update methods
      */
     private void setupPeriodicUpdates() {
@@ -237,6 +254,18 @@ public class PrimaryController implements Initializable{
         // ensure UI updates run on the JavaFx application thread
         cpuProgressBar.setProgress(cpuLoad / 100.0);
         cpuLabel.setText(df.format(cpuLoad) + "%");
+
+        if (cpuLoad > 80.0) {
+            cpuLabel.setStyle(
+                "-fx-text-fill: #ff3333; " + 
+                "-fx-font-weight: bold; " + 
+                "-fx-effect: dropshadow(three-pass-box, rgba(255, 0, 0, 0.5), 4, 0, 0, 0)");
+        } else {
+            cpuLabel.setStyle(
+                "-fx-text-fill: black; " +
+                "-fx-font-weight: bold;"
+            );
+        }
     }
 
     /**
@@ -257,6 +286,15 @@ public class PrimaryController implements Initializable{
             FormatUtil.formatBytes(totalMemory) + 
             " (" + df.format(memoryUsagePercent) + "%)"
         );
+
+        if (memoryUsagePercent > 80.0) {
+            memoryLabel.setStyle("-fx-text-fill: #ff3333; " + 
+                "-fx-font-weight: bold; " + 
+                "-fx-effect: dropshadow(three-pass-box, rgba(255, 0, 0, 0.5), 4, 0, 0, 0)");
+        } else {
+            memoryLabel.setStyle("-fx-text-fill: black; " +
+                "-fx-font-weight: bold;");
+        }
     }
 
     /**
@@ -331,6 +369,20 @@ public class PrimaryController implements Initializable{
         // check if valid temperature (based on the API docs)
         if (temp > 0.0 && !Double.isNaN(temp)) {
             cpuTemperatureLabel.setText(df.format(temp) + " °C");
+
+            // apply high temperature
+            if (temp > 70.0) {
+                cpuTemperatureLabel.setStyle(
+                    "-fx-text-fill: #ff3333; " + 
+                    "-fx-font-weight: bold; " + 
+                    "-fx-effect: dropshadow(three-pass-box, rgba(255, 0, 0, 0.5), 4, 0, 0, 0)"
+                );
+            } else {
+                cpuTemperatureLabel.setStyle(
+                    "-fx-text-fill: black; " +
+                    "-fx-font-weight: bold;"
+                );
+            }
         } else {
             cpuTemperatureLabel.setText("N/A");
         }
@@ -500,16 +552,40 @@ public class PrimaryController implements Initializable{
         for (ApplicationInfo app: listOfApps) {
             // extract data
             String name = app.getName() != null && !app.getName().isEmpty() ? app.getName() : "Unknown";
+            String version = app.getVersion() != null && !app.getVersion().isEmpty() ? app.getVersion() : "N/A";
+            String vendor = app.getVersion() != null && !app.getVendor().isEmpty() ? app.getVendor() : "N/A";
+            // Long UNIX miliseconds timestamp
             long timestamp = app.getTimestamp();
-            
+            String timestampStr;
+            if (timestamp == 0) {
+                timestampStr = "N/A";
+            } else {
+                timestampStr = TimeConverter.convertMilis(timestamp);
+            }
+
+            currentApplications.add(new AppsInfo(name, timestampStr, vendor, version));
+        }
+
+        // sort by name for consistent ordering
+        currentApplications.sort(Comparator.comparing(AppsInfo::getName, String.CASE_INSENSITIVE_ORDER));
+
+        // update the observable list
+        // check if data has actually changed to avoid unnessary UI updates
+        if (!applicationData.equals(currentApplications)) {
+            applicationData.setAll(currentApplications);
         }
     }
 
+    /**
+     * Convert Unix milisecond epoch to local time
+     * @param timestamp Unix milisecond
+     * @return local time in string 
+     */
     private String convertTimeStamp(long timestamp) {
         Instant instant = Instant.ofEpochMilli(timestamp);
         DateTimeFormatter formatter = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.of("UTC"));
+            .withZone(ZoneId.systemDefault());
         return formatter.format(instant);
     }
 

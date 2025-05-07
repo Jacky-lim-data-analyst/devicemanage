@@ -1,0 +1,115 @@
+/* General TableView Styling */
+.table-view {
+    /* Base background color of the table */
+    -fx-background-color: #F4F6F8; /* Light grey background */
+    /* Color of the border around the table */
+    -fx-border-color: #D1D9E0; /* Slightly darker grey border */
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px; /* Rounded corners for the table */
+    -fx-background-radius: 8px; /* Ensure background respects border radius */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0.5, 0, 2); /* Subtle shadow for depth */
+}
+
+/* Column Header Styling */
+.table-view .column-header-background {
+    /* Background color of the header row */
+    -fx-background-color: #E9ECEF; /* Lighter grey for header */
+    -fx-background-radius: 8px 8px 0 0; /* Rounded top corners */
+    -fx-background-insets: 0 0 0 0; /* No insets */
+}
+
+.table-view .column-header, .table-view .filler {
+    /* Background color of individual column headers */
+    -fx-background-color: transparent; /* Make individual headers transparent to show background */
+    -fx-border-color: transparent #D1D9E0 transparent transparent; /* Right border for separation */
+    -fx-border-width: 0 1px 0 0;
+    -fx-padding: 10px 12px; /* Padding within headers */
+    -fx-size: 40px; /* Fixed height for header row */
+}
+
+.table-view .column-header .label {
+    /* Text styling for column headers */
+    -fx-text-fill: #343A40; /* Dark grey text for good contrast */
+    -fx-font-family: "System", sans-serif; /* Or your preferred font */
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT; /* Align text to the left */
+}
+
+/* No right border for the last column header */
+.table-view .column-header:last-visible, .table-view .filler:last-visible {
+    -fx-border-color: transparent;
+}
+
+/* Table Cell Styling */
+.table-view .table-cell {
+    -fx-padding: 8px 12px; /* Padding within cells */
+    -fx-text-fill: #495057; /* Slightly lighter text color for cells */
+    -fx-font-family: "System", sans-serif;
+    -fx-font-size: 12px;
+    -fx-border-color: transparent #E0E0E0 transparent transparent; /* Light right border for cell separation */
+    -fx-border-width: 0 1px 0 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* No right border for cells in the last column */
+.table-view .table-column:last-visible .table-cell {
+    -fx-border-color: transparent;
+}
+
+/* Row Styling */
+.table-row-cell {
+    -fx-background-color: #FFFFFF; /* Default row background */
+    -fx-border-width: 0 0 1px 0; /* Bottom border for rows */
+    -fx-border-color: #E9ECEF; /* Light border color */
+}
+
+/* Alternating Row Colors (Zebra Stripes) */
+.table-row-cell:odd {
+    -fx-background-color: #F8F9FA; /* Slightly off-white for odd rows */
+}
+
+/* Hover effect on rows */
+.table-row-cell:hover {
+    -fx-background-color: #E0E6EB; /* Light blueish-grey on hover */
+    -fx-text-fill: #212529; /* Darken text on hover for better readability */
+}
+
+/* Selected Row Styling */
+.table-row-cell:selected {
+    -fx-background-color: #007BFF; /* Blue background for selected row */
+    -fx-text-fill: white; /* White text for selected row */
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: white; /* Ensure text in all cells of selected row is white */
+    -fx-border-color: transparent #0069D9 transparent transparent; /* Adjust cell border for selected row */
+}
+
+/* ScrollBar Styling (Basic - JavaFX scrollbar styling is somewhat limited) */
+.table-view .scroll-bar:horizontal, .table-view .scroll-bar:vertical {
+    -fx-background-color: #F4F6F8; /* Background of the scrollbar track */
+    -fx-background-radius: 5px;
+}
+
+.table-view .scroll-bar .thumb {
+    -fx-background-color: #ADB5BD; /* Color of the scrollbar thumb */
+    -fx-background-insets: 2;
+    -fx-background-radius: 5px; /* Rounded thumb */
+}
+
+.table-view .scroll-bar .thumb:hover {
+    -fx-background-color: #868E96; /* Darker thumb on hover */
+}
+
+/* Buttons on scrollbars (arrows) */
+.table-view .scroll-bar .increment-button, .table-view .scroll-bar .decrement-button {
+    -fx-background-color: #CED4DA;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+.table-view .scroll-bar .increment-arrow, .table-view .scroll-bar .decrement-arrow {
+    -fx-shape: " "; /* Hide default arrow shape if you want to use icons or simpler look */
+    -fx-padding: 3px;
+}
